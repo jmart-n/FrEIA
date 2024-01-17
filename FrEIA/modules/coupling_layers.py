@@ -382,26 +382,26 @@ class GINCouplingBlock(_BaseCouplingBlock):
         a2 = self.subnet2(u2)
         s2, t2 = a2[:, :self.split_len1], a2[:, self.split_len1:]
         s2 = self.clamp * self.f_clamp(s2)
-        s2 -= s2.mean(1, keepdim=True)
+        s2_scaled = s2 - s2.mean(1, keepdim=True)
 
         if rev:
-            y1 = (x1 - t2) * torch.exp(-s2)
+            y1 = (x1 - t2) * torch.exp(-s2_scaled)
             return y1, 0.
         else:
-            y1 = torch.exp(s2) * x1 + t2
+            y1 = torch.exp(s2_scaled) * x1 + t2
             return y1, 0.
 
     def _coupling2(self, x2, u1, rev=False):
         a1 = self.subnet1(u1)
         s1, t1 = a1[:, :self.split_len2], a1[:, self.split_len2:]
         s1 = self.clamp * self.f_clamp(s1)
-        s1 -= s1.mean(1, keepdim=True)
-
+        s1_scaled = s1 - s1.mean(1, keepdim=True)
+        
         if rev:
-            y2 = (x2 - t1) * torch.exp(-s1)
+            y2 = (x2 - t1) * torch.exp(-s1_scaled)
             return y2, 0.
         else:
-            y2 = torch.exp(s1) * x2 + t1
+            y2 = torch.exp(s1_scaled) * x2 + t1
             return y2, 0.
 
 
